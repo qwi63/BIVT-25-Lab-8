@@ -113,7 +113,16 @@ namespace Lab8.Green
         {
             public static void Sort(Student[] students) // сортирует студентов по номеру их студ.билета
             {
-                Array.Sort(students, (a, b) => a.ID.CompareTo(b.ID));
+                for (int i = 0; i < students.Length - 1; i++)
+                {
+                    for (int j = 0; j < students.Length - 1 - i; j++)
+                    {
+                        if (students[j].ID > students[j + 1].ID)
+                        {
+                            (students[j], students[j + 1]) = (students[j + 1], students[j]);
+                        }
+                    }
+                }
             }
             public static Student[] Expel(ref Student[] students) // возвращает массив исключенных студентов
             {
