@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Diagnostics.Metrics;
 
 namespace Lab8.Green
@@ -7,24 +6,20 @@ namespace Lab8.Green
     {
         public class Student
         {
-            // поля
-            private string _name; // Устанавливаются в конструкторе,читаются через свойства
+            private string _name;
             private string _surname;
             private int[] _marks;
             private bool _status = false;
             private int _id;
-            static int count;
-
-            // свойства
+            static int counter;
 
             public string Name => _name;
             public string Surname => _surname;
-            public int[] Marks => _marks.ToArray(); // получаем копию массива
-            public bool IsExpelled => _status;
             public int ID => _id;
-           
+            public int[] Marks => _marks.ToArray();
+            public bool IsExpelled => _status;
 
-            public double AverageMark // возвращает среднее значение оценок студента
+            public double AverageMark
             {
                 get
                 {
@@ -33,74 +28,70 @@ namespace Lab8.Green
 
                     for (int i = 0; i < _marks.Length; i++)
                     {
-                        if (_marks[i] > 0) // если оценка есть, то суммируем значения и считаем кол-во
+                        if (_marks[i] > 0)
                         {
                             sum += _marks[i];
                             validMarksCount++;
                         }
                     }
 
-                    if (validMarksCount == 0) // если оценок нет
+                    if (validMarksCount == 0) 
                         return 0;
 
                     return sum / validMarksCount;
                 }
             }
-            static Student() // Статический конструктор в классе Student должен устанавливать поле для номера первого студенческого билета равным 1.
-            {
-                 count = 1;
-            }
 
-            public Student(string name, string surname) // конструктор, принимает 2 строковых поля
+            static Student()
             {
-                _name = name; // сохраняет переданное имя в ранее созданное поле _name
+                int counter = 1;
+            }
+            public Student(string name, string surname)
+            {
+                _name = name;
                 _surname = surname;
                 _marks = new int[3];
-                _id = count;
-                count++;// 3 экзамена сдают студенты, 3 места для оценок
+                _id = counter;
+                counter++;
             }
-            public void Exam(int mark) // заменяет оценку по предмету
-                                       // новой оценкой, если эта оценка выше «2». 
+
+            public void Exam(int mark)
             {
-                if (_status) return;// сразу проверим, не отчислился ли
+                if (_status)
+                    return;
+                
                 for (int i = 0; i < _marks.Length; i++)
                 {
                     if (_marks[i] == 0)
                     {
-                        if (mark > 2) // если оценка больше 2, то заполняем в массив оценок _marks
+                        if(mark > 2)
                         {
                             _marks[i] = mark;
                             break;
                         }
 
-                        if (mark == 2) // если оценка == 2, то отчислен
+                        if (mark == 2)
                         {
-                            _status = true; // отчислен? да
+                            _status = true;
                             _marks[i] = mark;
                             break;
                         }
                     }
                 }
             }
-            public static void SortByAverageMark(Student[] array)
-            {
-                for (int i = 0; i < array.Length - 1; i++)
-                {
-                    for (int j = 0; j < array.Length - 1 - i; j++)
-                    {
-                        if (array[j].AverageMark < array[j + 1].AverageMark)
-                        {
-                            (array[j], array[j + 1]) = (array[j + 1], array[j]);
-                        }
-                    }
-                }
-            }
-            public void Restore() // меняет статус студента с “отчисленного” на “не отчисленного”.
+
+            public void Restore()
             {
                 if (_status)
                     _status = false;
             }
-            public void Print() // для вывода информации о необходимых полях структуры
+
+            public static void SortByAverageMark(Student[] array)
+            {
+                Array.Sort(array, (a, b) => b.AverageMark.CompareTo(a.AverageMark));
+            }
+
+            public void Print()
             {
                 Console.WriteLine($"Name: {Name}");
                 Console.WriteLine($"Surname: {Surname}");
@@ -109,45 +100,40 @@ namespace Lab8.Green
                 Console.WriteLine($"Is expelled: {IsExpelled}");
             }
         }
+
         public class Commission
         {
-            public static void Sort(Student[] students) // сортирует студентов по номеру их студ.билета
+            public static void Sort(Student[] students)
             {
-                for (int i = 0; i < students.Length - 1; i++)
-                {
-                    for (int j = 0; j < students.Length - 1 - i; j++)
-                    {
-                        if (students[j].ID > students[j + 1].ID)
-                        {
-                            (students[j], students[j + 1]) = (students[j + 1], students[j]);
-                        }
-                    }
-                }
+                Array.Sort(students, (a, b) => a.ID.CompareTo(b.ID));
             }
-            public static Student[] Expel(ref Student[] students) // возвращает массив исключенных студентов
+
+            public static Student[] Expel(ref Student[] students)
             {
                 Student[] expelledStudents = students.Where(s => s.IsExpelled).ToArray();
                 students = students.Where(s => !s.IsExpelled).ToArray();
-
+                
                 return expelledStudents;
             }
-            public static void Restore(ref Student[] students, Student restored) // позволяет добавить студента в массив на место в соответствии с номером его студ.билета
+
+            public static void Restore(ref Student[] students, Student restored)
             {
-                
-                bool flag = false; // будет сигнализировать, найден ли студент в массиве
-                foreach (var student in students) // ищем студента в массиве
+                bool flag = false;
+                foreach (var student in students)
                 {
-                    if (student == restored) 
+                    if (student == restored)
                     {
-                        flag = true; // если студент найден
-                        break; 
+                        flag = true;
+                        break;
                     }
                 }
-                if (!flag) // если студент не найден, то добавляем его
+
+                if (!flag)
                 {
-                    Array.Resize(ref students, students.Length + 1);
+                    Array.Resize(ref students,students.Length + 1);
                     students[students.Length - 1] = restored;
                 }
+                
                 Sort(students);
             }
         }
